@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بستان ريم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FCFAEC;
+    --forest:#1F4B37;
+    --forest-soft:#5C7A67;
+    --island-top:#8DC24A;
+    --island-mid:#6FA83A;
+    --island-side:#4C7A2E;
+    --island-outline:#3A5D24;
+    --line:#2B2B2B;
+    --red:#D6432E;
+    --orange:#F0923D;
+    --yellow:#F6CD5B;
+    --pink:#F3AFC7;
+    --darkgreen:#2F5233;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--cream);
+    color:var(--forest);
+    font-family:'Tajawal', sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:36px 20px 70px;
+  }
+  h1,h2{ font-family:'Lalezar', sans-serif; font-weight:400; margin:0; letter-spacing:.5px; }
+
+  .hidden{ display:none !important; }
+
+  /* ---------- PLANT / HOME VIEW ---------- */
+  #plantView{ width:100%; max-width:1080px; }
+  .title{
+    text-align:center;
+    font-size:clamp(30px,5vw,46px);
+    color:var(--forest);
+    margin-bottom:34px;
+  }
+  .plant-layout{
+    display:flex;
+    gap:40px;
+    align-items:flex-start;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+
+  /* island illustration */
+  .island-wrap{ flex:1 1 460px; max-width:560px; }
+  .island-wrap svg{ width:100%; height:auto; display:block; }
+  .island-hint{
+    text-align:center;
+    font-size:13px;
+    color:var(--forest-soft);
+    margin-top:8px;
+  }
+  .island-flower-img{ cursor:pointer; }
+
+  /* control panel */
+  .panel{
+    flex:0 0 400px;
+    max-width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:14px;
+  }
+  .name-row{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    width:100%;
+  }
+  .name-row label{ font-size:13px; color:var(--forest-soft); }
+  .name-row input{
+    border:1.5px solid var(--forest);
+    background:#fff;
+    border-radius:999px;
+    padding:8px 16px;
+    font-family:'Tajawal', sans-serif;
+    font-size:14px;
+    color:var(--forest);
+    outline:none;
+    width:100%;
+  }
+  .name-row input:focus{ border-color:var(--darkgreen); }
+
+  .panel-question{
+    font-size:15px;
+    color:var(--forest-soft);
+    margin-top:6px;
+  }
+  .panel-row{
+    display:flex;
+    gap:16px;
+    align-items:flex-start;
+  }
+  .swatches{
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+  }
+  .swatch{
+    width:26px; height:26px;
+    border-radius:50%;
+    border:2px solid rgba(0,0,0,0.15);
+    cursor:pointer;
+  }
+  .swatch.selected{
+    outline:2px solid var(--line);
+    outline-offset:2px;
+  }
+  .wheel-swatch{
+    width:28px; height:28px;
+    border-radius:50%;
+    cursor:pointer;
+    position:relative;
+    background:conic-gradient(red, yellow, lime, cyan, blue, magenta, red);
+    border:2px solid rgba(0,0,0,0.15);
+  }
+  .wheel-swatch.selected{
+    outline:2px solid var(--line);
+    outline-offset:2px;
+  }
+  .wheel-swatch input[type="color"]{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    opacity:0;
+    cursor:pointer;
+    border:none;
+    padding:0;
+  }
+
+  .canvas-box{
+    position:relative;
+    width:340px;
+    height:340px;
+    max-width:100%;
+    border:2px dashed var(--line);
+    border-radius:4px;
+    background:transparent;
+  }
+  #drawCanvas{
+    width:100%; height:100%;
+    display:block;
+    touch-action:none;
+    cursor:crosshair;
+  }
+  .canvas-tools{
+    position:absolute;
+    top:6px;
+    left:6px;
+    display:flex;
+    gap:6px;
+  }
+  .icon-btn{
+    background:none;
+    border:none;
+    font-size:16px;
+    cursor:pointer;
+    color:var(--line);
+    line-height:1;
+    padding:2px;
+  }
+  .icon-btn:hover{ color:var(--red); }
+
+  .brush-row{
+    display:flex; align-items:center; gap:8px;
+    font-size:12px; color:var(--forest-soft);
+  }
+  .brush-row input[type=range]{ width:90px; accent-color:var(--darkgreen); }
+
+  .pill-btn{
+    border:1.5px solid var(--forest);
+    background:var(--cream);
+    color:var(--forest);
+    padding:9px 22px;
+    border-radius:999px;
+    font-family:'Tajawal', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  .pill-btn:hover{ background:#F2EFDD; }
+  .pill-btn:disabled{ opacity:.45; cursor:not-allowed; }
+
+  .gallery-link-row{
+    width:100%;
+    display:flex;
+    justify-content:flex-end;
+    margin-top:20px;
+  }
+
+  /* ---------- GALLERY VIEW ---------- */
+  #galleryView{ width:100%; max-width:1200px; }
+  .gallery-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:6px;
+    flex-wrap:wrap;
+    gap:14px;
+  }
+  .gallery-header h1{ font-size:clamp(26px,4vw,38px); }
+  .gallery-count{
+    font-size:13px;
+    color:var(--forest-soft);
+    margin:6px 0 26px;
+  }
+  .flower-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(56px, 1fr));
+    gap:6px;
+  }
+  .flower-cell{
+    aspect-ratio:1/1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    border-radius:8px;
+    transition:background .12s ease;
+  }
+  .flower-cell:hover{ background:rgba(140,180,90,0.18); }
+  .flower-cell img{
+    width:100%; height:100%;
+    object-fit:contain;
+  }
+  .gallery-status{
+    text-align:center;
+    color:var(--forest-soft);
+    font-size:15px;
+    padding:50px 0;
+  }
+
+  /* ---------- MODAL ---------- */
+  #modalOverlay{
+    position:fixed; inset:0;
+    background:rgba(30,40,25,0.45);
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+    z-index:50;
+  }
+  #modalOverlay.hidden{ display:none; }
+  .modal-card{
+    background:var(--cream);
+    border:2px solid var(--line);
+    border-radius:14px;
+    padding:26px;
+    max-width:280px;
+    width:100%;
+    text-align:center;
+  }
+  .modal-card img{
+    width:110px; height:110px;
+    object-fit:contain;
+    margin-bottom:12px;
+  }
+  .modal-card h3{ font-family:'Lalezar',sans-serif; font-weight:400; color:var(--forest); font-size:20px; margin-bottom:6px; }
+  .modal-card p{ color:var(--forest-soft); font-size:13px; margin:0 0 18px; }
+
+  @media (max-width:560px){
+    .plant-layout{ flex-direction:column; align-items:center; }
+    .panel{ align-items:center; width:100%; max-width:280px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== PLANT VIEW ===================== -->
+<div id="plantView">
+  <h1 class="title">بستان ريم</h1>
+
+  <div class="plant-layout">
+    <div class="island-wrap">
+      <svg viewBox="0 0 560 440" xmlns="http://www.w3.org/2000/svg">
+        <!-- island shadow/side -->
+        <path d="M120 250 C40 260 30 340 90 380 C150 420 260 415 320 400 C400 380 470 400 500 350 C530 300 500 250 460 235 C500 210 490 150 430 140 C450 90 390 55 330 75 C300 40 220 40 190 80 C130 70 80 110 95 165 C50 175 30 220 70 245 C50 250 40 255 55 270 Z"
+              fill="var(--island-side)"/>
+        <!-- island top -->
+        <path d="M115 235 C35 245 25 320 85 358 C145 396 250 392 310 378 C388 359 455 378 484 330 C512 283 484 236 446 222 C484 198 474 142 418 132 C437 85 380 52 323 71 C294 38 217 38 188 76 C130 67 82 105 96 158 C52 168 33 210 71 233 C52 238 42 243 55 257 Z"
+              fill="var(--island-top)"/>
+
+        <!-- grass tufts (each blade sways gently) -->
+        <g stroke="var(--island-outline)" stroke-width="2.4" stroke-linecap="round" fill="none" opacity="0.6">
+          <path d="M140 130 q3 -18 0 -26 M148 130 q6 -16 4 -24 M156 132 q2 -14 8 -20">
+            <animateTransform attributeName="transform" type="rotate" values="-4 148 130;4 148 130;-4 148 130" dur="3.4s" repeatCount="indefinite"/>
+          </path>
+          <path d="M330 90 q3 -16 0 -24 M338 90 q6 -14 4 -22 M346 92 q2 -12 8 -18">
+            <animateTransform attributeName="transform" type="rotate" values="4 338 90;-4 338 90;4 338 90" dur="3.9s" repeatCount="indefinite"/>
+          </path>
+          <path d="M420 170 q3 -16 0 -24 M428 170 q6 -14 4 -22 M436 172 q2 -12 8 -18">
+            <animateTransform attributeName="transform" type="rotate" values="-3 428 170;3 428 170;-3 428 170" dur="3s" repeatCount="indefinite"/>
+          </path>
+          <path d="M240 340 q3 -16 0 -24 M248 340 q6 -14 4 -22 M256 342 q2 -12 8 -18">
+            <animateTransform attributeName="transform" type="rotate" values="3 248 340;-3 248 340;3 248 340" dur="3.6s" repeatCount="indefinite"/>
+          </path>
+          <path d="M380 300 q3 -16 0 -24 M388 300 q6 -14 4 -22 M396 302 q2 -12 8 -18">
+            <animateTransform attributeName="transform" type="rotate" values="-4 388 300;4 388 300;-4 388 300" dur="4.1s" repeatCount="indefinite"/>
+          </path>
+          <path d="M110 300 q3 -16 0 -24 M118 300 q6 -14 4 -22 M126 302 q2 -12 8 -18">
+            <animateTransform attributeName="transform" type="rotate" values="4 118 300;-4 118 300;4 118 300" dur="3.2s" repeatCount="indefinite"/>
+          </path>
+          <path d="M300 230 q3 -16 0 -24 M308 230 q6 -14 4 -22 M316 232 q2 -12 8 -18">
+            <animateTransform attributeName="transform" type="rotate" values="-3 308 230;3 308 230;-3 308 230" dur="3.7s" repeatCount="indefinite"/>
+          </path>
+          <path d="M200 270 q3 -16 0 -24 M208 270 q6 -14 4 -22 M216 272 q2 -12 8 -18">
+            <animateTransform attributeName="transform" type="rotate" values="3 208 270;-3 208 270;3 208 270" dur="3.3s" repeatCount="indefinite"/>
+          </path>
+          <path d="M180 190 q3 -16 0 -24 M188 190 q6 -14 4 -22 M196 192 q2 -12 8 -18">
+            <animateTransform attributeName="transform" type="rotate" values="-4 188 190;4 188 190;-4 188 190" dur="3.8s" repeatCount="indefinite"/>
+          </path>
+          <path d="M360 230 q3 -16 0 -24 M368 230 q6 -14 4 -22 M376 232 q2 -12 8 -18">
+            <animateTransform attributeName="transform" type="rotate" values="4 368 230;-4 368 230;4 368 230" dur="3s" repeatCount="indefinite"/>
+          </path>
+          <path d="M280 320 q3 -16 0 -24 M288 320 q6 -14 4 -22 M296 322 q2 -12 8 -18">
+            <animateTransform attributeName="transform" type="rotate" values="-3 288 320;3 288 320;-3 288 320" dur="3.5s" repeatCount="indefinite"/>
+          </path>
+          <path d="M440 270 q3 -16 0 -24 M448 270 q6 -14 4 -22 M456 272 q2 -12 8 -18">
+            <animateTransform attributeName="transform" type="rotate" values="3 448 270;-3 448 270;3 448 270" dur="4s" repeatCount="indefinite"/>
+          </path>
+          <path d="M150 230 q3 -16 0 -24 M158 230 q6 -14 4 -22 M166 232 q2 -12 8 -18">
+            <animateTransform attributeName="transform" type="rotate" values="-4 158 230;4 158 230;-4 158 230" dur="3.6s" repeatCount="indefinite"/>
+          </path>
+          <path d="M320 170 q3 -16 0 -24 M328 170 q6 -14 4 -22 M336 172 q2 -12 8 -18">
+            <animateTransform attributeName="transform" type="rotate" values="4 328 170;-4 328 170;4 328 170" dur="3.1s" repeatCount="indefinite"/>
+          </path>
+        </g>
+
+        <!-- real planted flowers appear here once someone plants one -->
+        <g id="islandFlowers"></g>
+      </svg>
+      <p class="island-hint" id="islandHint">لسه محدش زرع وردة هنا... زرعتك ممكن تكون أول واحدة 🌱</p>
+    </div>
+
+    <div class="panel">
+      <div class="name-row">
+        <label for="nameInput">اسمك</label>
+        <input id="nameInput" type="text" maxlength="30" placeholder="اكتب اسمك هنا">
+      </div>
+
+      <div class="panel-question">أضف وردة لبستاننا؟</div>
+
+      <div class="panel-row">
+        <div class="swatches" id="palette"></div>
+
+        <div class="canvas-box">
+          <canvas id="drawCanvas" width="340" height="340"></canvas>
+          <div class="canvas-tools">
+            <button class="icon-btn" id="undoBtn" title="تراجع خطوة">↺</button>
+            <button class="icon-btn" id="clearBtn" title="امسح الكل">🗑</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="brush-row">
+        <span>سُمك الفرشاة</span>
+        <input type="range" id="brushSize" min="2" max="14" value="5">
+      </div>
+
+      <button class="pill-btn" id="plantBtn" disabled>🌱 ازرع</button>
+
+      <div class="gallery-link-row">
+        <button class="pill-btn" id="goGalleryBtn">🖼️ شاهد معرض الزهور</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== GALLERY VIEW ===================== -->
+<div id="galleryView" class="hidden">
+  <div class="gallery-header">
+    <div>
+      <h1>معرض الزهور</h1>
+      <div class="gallery-count" id="galleryCount"></div>
+    </div>
+    <button class="pill-btn" id="backBtn">→ العودة للبستان</button>
+  </div>
+  <div class="flower-grid" id="flowerGrid">
+    <div class="gallery-status" id="galleryStatus">جاري تحميل الزهور... 🌸</div>
+  </div>
+</div>
+
+<!-- ===================== MODAL ===================== -->
+<div id="modalOverlay" class="hidden">
+  <div class="modal-card">
+    <img id="modalImg" src="" alt="زهرة">
+    <h3 id="modalName"></h3>
+    <p id="modalDate"></p>
+    <button class="pill-btn" id="modalClose">إغلاق</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const COLORS = [
+    { c:'var(--red)', hex:'#D6432E' },
+    { c:'var(--orange)', hex:'#F0923D' },
+    { c:'var(--yellow)', hex:'#F6CD5B' },
+    { c:'var(--pink)', hex:'#F3AFC7' },
+    { c:'var(--darkgreen)', hex:'#2F5233' }
+  ];
+  let currentColor = COLORS[0].hex;
+  let currentSize = 5;
+  let strokes = [];
+  let drawing = false;
+
+  const canvas = document.getElementById('drawCanvas');
+  const ctx = canvas.getContext('2d');
+  const nameInput = document.getElementById('nameInput');
+  const plantBtn = document.getElementById('plantBtn');
+
+  // palette
+  const palette = document.getElementById('palette');
+  COLORS.forEach((col, i) => {
+    const sw = document.createElement('div');
+    sw.className = 'swatch' + (i === 0 ? ' selected' : '');
+    sw.style.background = col.hex;
+    sw.addEventListener('click', () => {
+      currentColor = col.hex;
+      document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
+      document.querySelectorAll('.wheel-swatch').forEach(s => s.classList.remove('selected'));
+      sw.classList.add('selected');
+    });
+    palette.appendChild(sw);
+  });
+
+  // color wheel swatch
+  const wheelSwatch = document.createElement('div');
+  wheelSwatch.className = 'wheel-swatch';
+  wheelSwatch.title = 'عجلة الألوان';
+  wheelSwatch.innerHTML = '<input type="color" id="wheelInput" value="#8E5AA0">';
+  palette.appendChild(wheelSwatch);
+  const wheelInput = wheelSwatch.querySelector('#wheelInput');
+  wheelInput.addEventListener('input', () => {
+    currentColor = wheelInput.value;
+    document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
+    document.querySelectorAll('.wheel-swatch').forEach(s => s.classList.remove('selected'));
+    wheelSwatch.classList.add('selected');
+  });
+
+  document.getElementById('brushSize').addEventListener('input', e => {
+    currentSize = Number(e.target.value);
+  });
+
+  function updatePlantBtn(){
+    plantBtn.disabled = nameInput.value.trim().length === 0 || strokes.length === 0;
+  }
+  nameInput.addEventListener('input', updatePlantBtn);
+
+  function redraw(){
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    strokes.forEach(s => {
+      if(s.points.length === 0) return;
+      ctx.strokeStyle = s.color;
+      ctx.lineWidth = s.size;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(s.points[0].x, s.points[0].y);
+      if(s.points.length === 1){ ctx.lineTo(s.points[0].x+0.1, s.points[0].y+0.1); }
+      s.points.forEach(p => ctx.lineTo(p.x, p.y));
+      ctx.stroke();
+    });
+  }
+  function getPos(e){
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x:(clientX-rect.left)*scaleX, y:(clientY-rect.top)*scaleY };
+  }
+  function startDraw(e){
+    e.preventDefault();
+    drawing = true;
+    strokes.push({ color: currentColor, size: currentSize, points:[getPos(e)] });
+    redraw();
+    updatePlantBtn();
+  }
+  function moveDraw(e){
+    if(!drawing) return;
+    e.preventDefault();
+    strokes[strokes.length-1].points.push(getPos(e));
+    redraw();
+  }
+  function endDraw(){ drawing = false; updatePlantBtn(); }
+
+  canvas.addEventListener('pointerdown', startDraw);
+  canvas.addEventListener('pointermove', moveDraw);
+  window.addEventListener('pointerup', endDraw);
+  canvas.addEventListener('touchstart', startDraw, {passive:false});
+  canvas.addEventListener('touchmove', moveDraw, {passive:false});
+  canvas.addEventListener('touchend', endDraw);
+
+  document.getElementById('undoBtn').addEventListener('click', () => {
+    strokes.pop(); redraw(); updatePlantBtn();
+  });
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    strokes = []; redraw(); updatePlantBtn();
+  });
+
+  document.getElementById('plantBtn').addEventListener('click', async () => {
+    if(strokes.length === 0 || nameInput.value.trim().length === 0) return;
+    plantBtn.disabled = true;
+    plantBtn.textContent = 'جاري الزرع...';
+    try{
+      const image = canvas.toDataURL('image/png');
+      const flower = { name: nameInput.value.trim(), date: new Date().toISOString(), image };
+      const key = 'flower:' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+      const result = await window.storage.set(key, JSON.stringify(flower), true);
+      if(!result) throw new Error('save failed');
+      strokes = [];
+      redraw();
+      plantBtn.textContent = '🌱 ازرع';
+      updatePlantBtn();
+      await loadIslandFlowers();
+    }catch(err){
+      console.error(err);
+      alert('حصلت مشكلة في زرع الوردة، جرّب تاني.');
+      plantBtn.textContent = '🌱 ازرع';
+      updatePlantBtn();
+    }
+  });
+
+  // ---------- island (shows real planted flowers) ----------
+  const ISLAND_SLOTS = [
+    {x:148, y:130}, {x:338, y:90}, {x:428, y:170}, {x:248, y:340},
+    {x:388, y:300}, {x:118, y:300}, {x:308, y:230}, {x:208, y:270},
+    {x:188, y:190}, {x:368, y:230}, {x:288, y:320}, {x:448, y:270},
+    {x:158, y:230}, {x:328, y:170}
+  ];
+
+  async function fetchAllFlowers(){
+    const listResult = await window.storage.list('flower:', true);
+    const keys = (listResult && listResult.keys) ? listResult.keys : [];
+    const flowers = [];
+    for(const key of keys){
+      try{
+        const item = await window.storage.get(key, true);
+        if(item && item.value) flowers.push({ id:key, ...JSON.parse(item.value) });
+      }catch(e){ console.error('load error', key, e); }
+    }
+    flowers.sort((a,b) => new Date(b.date) - new Date(a.date));
+    return flowers;
+  }
+
+  async function loadIslandFlowers(){
+    const group = document.getElementById('islandFlowers');
+    const hint = document.getElementById('islandHint');
+    try{
+      const flowers = await fetchAllFlowers();
+      group.innerHTML = '';
+      if(flowers.length === 0){
+        hint.classList.remove('hidden');
+        return;
+      }
+      hint.classList.add('hidden');
+      const shown = flowers.slice(0, ISLAND_SLOTS.length);
+      shown.forEach((f, i) => {
+        const slot = ISLAND_SLOTS[i];
+        const size = 44;
+        const ns = 'http://www.w3.org/2000/svg';
+        const stem = document.createElementNS(ns, 'line');
+        stem.setAttribute('x1', slot.x); stem.setAttribute('y1', slot.y + size/2 - 4);
+        stem.setAttribute('x2', slot.x); stem.setAttribute('y2', slot.y + size/2 + 10);
+        stem.setAttribute('stroke', 'var(--island-outline)');
+        stem.setAttribute('stroke-width', '2.5');
+        stem.setAttribute('stroke-linecap', 'round');
+        group.appendChild(stem);
+
+        const img = document.createElementNS(ns, 'image');
+        img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', f.image);
+        img.setAttribute('href', f.image);
+        img.setAttribute('x', slot.x - size/2);
+        img.setAttribute('y', slot.y - size/2);
+        img.setAttribute('width', size);
+        img.setAttribute('height', size);
+        img.setAttribute('class', 'island-flower-img');
+        img.addEventListener('click', () => openModal(f));
+        const title = document.createElementNS(ns, 'title');
+        title.textContent = f.name || 'زهرة';
+        img.appendChild(title);
+        group.appendChild(img);
+      });
+    }catch(err){
+      console.error('island load error', err);
+    }
+  }
+  loadIslandFlowers();
+
+  // ---------- view switching ----------
+  const plantView = document.getElementById('plantView');
+  const galleryView = document.getElementById('galleryView');
+  document.getElementById('goGalleryBtn').addEventListener('click', showGallery);
+  document.getElementById('backBtn').addEventListener('click', () => {
+    galleryView.classList.add('hidden');
+    plantView.classList.remove('hidden');
+    loadIslandFlowers();
+  });
+  function showGallery(){
+    plantView.classList.add('hidden');
+    galleryView.classList.remove('hidden');
+    loadGallery();
+  }
+
+  // ---------- gallery ----------
+  async function loadGallery(){
+    const grid = document.getElementById('flowerGrid');
+    const statusEl = document.getElementById('galleryStatus');
+    const countEl = document.getElementById('galleryCount');
+    grid.innerHTML = '<div class="gallery-status" id="galleryStatus">جاري تحميل الزهور... 🌸</div>';
+    countEl.textContent = '';
+
+    try{
+      const flowers = await fetchAllFlowers();
+
+      if(flowers.length === 0){
+        grid.innerHTML = '<div class="gallery-status">البستان لسه فاضي... كن أول من يزرع وردة 🌱</div>';
+        return;
+      }
+
+      grid.innerHTML = '';
+      countEl.textContent = flowers.length + ' زهرة إجمالاً';
+
+      flowers.forEach(f => {
+        const cell = document.createElement('div');
+        cell.className = 'flower-cell';
+        cell.innerHTML = `<img src="${f.image}" alt="زهرة ${f.name || ''}">`;
+        cell.addEventListener('click', () => openModal(f));
+        grid.appendChild(cell);
+      });
+    }catch(err){
+      console.error('gallery load error', err);
+      grid.innerHTML = '<div class="gallery-status">تعذر تحميل البستان، حاول تحدّث الصفحة.</div>';
+    }
+  }
+
+  function openModal(f){
+    document.getElementById('modalImg').src = f.image;
+    document.getElementById('modalName').textContent = f.name || 'بدون اسم';
+    let dateStr = f.date;
+    try{ dateStr = new Date(f.date).toLocaleString('ar-EG', { dateStyle:'medium', timeStyle:'short' }); }catch(e){}
+    document.getElementById('modalDate').textContent = 'رُسمت في: ' + dateStr;
+    document.getElementById('modalOverlay').classList.remove('hidden');
+  }
+  document.getElementById('modalClose').addEventListener('click', () => {
+    document.getElementById('modalOverlay').classList.add('hidden');
+  });
+  document.getElementById('modalOverlay').addEventListener('click', e => {
+    if(e.target.id === 'modalOverlay') e.currentTarget.classList.add('hidden');
+  });
+})();
+</script>
+</body>
+</html>
